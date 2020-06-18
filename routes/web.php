@@ -12,5 +12,13 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('contents.index');
 });
+
+Auth::routes();
+
+// Route::get('/home', 'HomeController@index')->name('home');
+
+Route::resource('contents', 'ContentController');
+Route::resource('favourites', 'FavouriteController');
+Route::resource('file-upload', 'FileUploadController');

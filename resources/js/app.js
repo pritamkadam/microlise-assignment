@@ -7,6 +7,10 @@
 
 require('./bootstrap');
 
+window.$ = window.jQuery = require('jquery');
+
+window.bsCustomFileInput = require('bs-custom-file-input');
+
 window.Vue = require('vue');
 
 /**
