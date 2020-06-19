@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Content;
 use App\ContentCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ContentController extends Controller
 {
@@ -22,9 +24,16 @@ class ContentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('home');
+        $data = auth()->user()->contents()->with('content_category')->paginate(6);
+
+        // if ajax request
+        if ($request->ajax()) {
+            return view('content.pagination-cards', compact('data'))->render();
+        }
+
+        return view('content.index', compact('data'));
     }
 
     /**
@@ -36,7 +45,7 @@ class ContentController extends Controller
     {
         $content_categories = ContentCategory::all();
 
-        return view('content.create', ['content_categories' => $content_categories]);
+        return view('content.create', compact('content_categories'));
     }
 
     /**
@@ -48,17 +57,21 @@ class ContentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file_name' => 'required|string|max:255',
+            'file_name' => 'string',
+            'original_file_name' => 'string',
+            'file_path' => 'required|string',
             'content_category_id' => 'required|integer',
         ], [
-            'file_name.required' => 'File is required.'
+            'file_path.required' =>
+            'File is required.',
+            'content_category_id.required' => 'Please select a category.'
         ]);
 
         $user = auth()->user();
 
         $content = $user->contents()->create($request->all());
         if ($content) {
-            return response()->json(['status' => 'success', 'message' => 'Content stored successfully.']);
+            return response()->json(['status' => 'success', 'message' => 'Content stored successfully.', 'redirect_to' => route('contents.index')]);
         } else {
             return response()->json(['status' => 'error', 'message' => 'Failed to store.']);
         }
@@ -83,7 +96,15 @@ class ContentController extends Controller
      */
     public function edit($id)
     {
-        //
+        $content = auth()->user()->contents()->find($id);
+
+        if (!$content) {
+            return redirect('404');
+        }
+
+        $content_categories = ContentCategory::all();
+
+        return view('content.create', compact('content_categories', 'content'));
     }
 
     /**
@@ -95,7 +116,26 @@ class ContentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'file_name' => 'string',
+            'original_file_name' => 'string',
+            'file_path' => 'required|string',
+            'content_category_id' => 'required|integer',
+        ], [
+            'file_path.required' => 'File is required.',
+            'content_category_id.required' => 'Please select a category.'
+        ]);
+
+        $user = auth()->user();
+
+        $content = $user->contents()->find($id);
+
+        $update = $content->update($request->all());
+        if ($update) {
+            return response()->json(['status' => 'success', 'message' => 'Content stored successfully.', 'redirect_to' => route('contents.index')]);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Failed to store.']);
+        }
     }
 
     /**
@@ -106,6 +146,12 @@ class ContentController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $content = auth()->user()->contents()->find($id);
+
+        Storage::delete('public/files/' . $content->file_name);
+
+        $content->delete();
+
+        return response()->json(['status' => 'success', 'message' => 'Content deleted successfully.']);
     }
 }

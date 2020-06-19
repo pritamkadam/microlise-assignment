@@ -32,6 +32,18 @@ class ContentCategorySeeder extends Seeder
                 'Documents',
                 'created_at' => $dateTime,
                 'updated_at' => $dateTime
+            ],
+            [
+                'name' =>
+                'Audio',
+                'created_at' => $dateTime,
+                'updated_at' => $dateTime
+            ],
+            [
+                'name' =>
+                'YouTube or Vimeo Link',
+                'created_at' => $dateTime,
+                'updated_at' => $dateTime
             ]
         ]);
     }

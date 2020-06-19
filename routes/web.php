@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-    return redirect('contents.index');
+    return redirect(route('contents.index'));
 });
 
 Auth::routes();

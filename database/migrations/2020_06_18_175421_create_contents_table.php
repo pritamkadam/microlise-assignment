@@ -17,7 +17,10 @@ class CreateContentsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('content_category_id');
-            $table->text('file_name');
+            $table->text('file_name')->nullable();
+            $table->text('original_file_name')->nullable();
+            $table->text('file_path');
+            $table->enum('favorite', ['0', '1'])->default('0');
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('content_category_id')->references('id')->on('content_category');
             $table->timestamps();
