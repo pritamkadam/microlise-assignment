@@ -3,7 +3,7 @@
     <div class="col-md-4">
         <div class="card mb-4 shadow-sm">
             <div class="p-2 align-self-end favourite-wrapper"
-                onclick="toggleFavourite({{$row->id}}, {{$row->favorite}})">
+                onclick="toggleFavourite('{{route('contents.toggle-favorite',$row->id)}}')">
                 @if ($row->favorite === '0')
                 <svg class="bi bi-heart" width="1.5em" height="1.5em" viewBox="0 0 16 16" fill="currentColor"
                     xmlns="http://www.w3.org/2000/svg">

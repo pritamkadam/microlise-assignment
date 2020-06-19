@@ -21,4 +21,4 @@ Route::get('contents/favorites', 'ContentController@favorites')->name('contents.
 Route::resource('contents', 'ContentController');
 Route::resource('file-upload', 'FileUploadController');
 
-Route::post('contents/{id}/toggle-favorite', 'ContentController@toggleFavorite');
+Route::post('contents/{id}/toggle-favorite', 'ContentController@toggleFavorite')->name('contents.toggle-favorite');

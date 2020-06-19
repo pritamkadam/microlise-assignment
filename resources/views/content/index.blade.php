@@ -12,8 +12,8 @@
 <section class="jumbotron text-center">
     <div class="container">
         <h1>Content</h1>
-        <p class="lead text-muted">Something short and leading about the collection below—its contents, the creator,
-            etc. Make it short and sweet, but not too short so folks don’t simply skip over it entirely.</p>
+        <p class="lead text-muted">This page displays list of all user contents. Click on below "Add Content" button to
+            store new content.</p>
         <p>
             <a href={{ route('contents.create') }} class="btn btn-primary my-2">Add Content</a>
         </p>
@@ -83,10 +83,10 @@
         });
     }
 
-    function toggleFavourite(id, favorite){
+    function toggleFavourite(url){
     
     $.ajax({
-        url: 'contents/'+id+'/toggle-favorite',
+        url: url,
         method: 'POST',
         headers: {'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
         dataType: 'JSON',

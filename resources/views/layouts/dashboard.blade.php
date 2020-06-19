@@ -32,10 +32,10 @@
 
         <div class="navbar-collapse collapse" id="navbarsExample03" style="">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
+                <li class="nav-item {{ (request()->is('contents')) ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('contents.index') }}">Home</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item {{ (request()->is('contents/favorites')) ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('contents.favorites') }}">Favourites</a>
                 </li>
             </ul>
