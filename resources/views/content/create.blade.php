@@ -94,7 +94,6 @@
         $("#file").change(function(event){
             $('.alert').removeClass('d-block');
             $('.invalid-feedback').removeClass('d-block');
-            var serializeArray = $('#upload-file-form').serializeArray();
             var formData = new FormData();
             formData.append('file', this.files[0], this.files[0].name);
             $.ajax({
@@ -159,7 +158,6 @@
             $('.invalid-feedback').removeClass('d-block');
             $('#button-save .spinner-border').removeClass('d-none');
             $('#button-save').prop('disabled', true);
-            var serializeArray = $('#content-create-form').serializeArray();
             var formData = new FormData();
             if($('#content-create-form').attr('method') === 'PUT'){
                 formData.append('_method', 'PUT');    
@@ -186,8 +184,6 @@
                 dataType: 'JSON',
                 processData: false,
                 contentType: false,
-                beforeSend: function(XMLHttpRequest){
-                },
                 success: function(data){
                     $('#button-save .spinner-border').addClass('d-none');
                     $('#button-save').prop('disabled', false);
@@ -216,6 +212,6 @@
                 }
             });
         });
-    })
+    });
 </script>
 @stop

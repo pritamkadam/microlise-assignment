@@ -1,5 +1,13 @@
 @extends('layouts.dashboard')
 
+@section('css')
+<style>
+    .favourite-wrapper {
+        position: absolute;
+    }
+</style>
+@endsection
+
 @section('content')
 <section class="jumbotron text-center">
     <div class="container">
@@ -33,16 +41,7 @@
             fetch_data(href);
         });
     
-        function fetch_data(href)
-        {
-            $.ajax({
-                url:href,
-                success:function(data)
-                {
-                $('#content-data').html(data);
-                }
-            });
-        }
+        
     
         $(document).on('click', '.delete-content', function(event){
             event.preventDefault();
@@ -69,6 +68,38 @@
             
             });
         });
+
+        
     });
+
+    function fetch_data(href)
+    {
+        $.ajax({
+            url:href,
+            success:function(data)
+            {
+                $('#content-data').html(data);
+            }
+        });
+    }
+
+    function toggleFavourite(id, favorite){
+    
+    $.ajax({
+        url: 'contents/'+id+'/toggle-favorite',
+        method: 'POST',
+        headers: {'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')},
+        dataType: 'JSON',
+        processData: false,
+        contentType: false,
+        success: function(data){
+            fetch_data(window.location.href);
+        },
+        error: function(xhr, ajaxOptions, thrownError){
+            $('.alert').addClass('d-block alert-danger');
+            $('.alert').text(thrownError);
+        }
+    });
+    }
 </script>
 @endsection

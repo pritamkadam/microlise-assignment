@@ -26,14 +26,31 @@ class ContentController extends Controller
      */
     public function index(Request $request)
     {
-        $data = auth()->user()->contents()->with('content_category')->paginate(6);
+        $contents = auth()->user()->contents()->with('content_category')->paginate(6);
 
         // if ajax request
         if ($request->ajax()) {
-            return view('content.pagination-cards', compact('data'))->render();
+            return view('content.pagination-cards', compact('contents'))->render();
         }
 
-        return view('content.index', compact('data'));
+        return view('content.index', compact('contents'));
+    }
+
+    /**
+     * Display a listing of the favourite resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function favorites(Request $request)
+    {
+        $contents = auth()->user()->contents()->where('contents.favorite', '1')->with('content_category')->paginate(6);
+
+        // if ajax request
+        if ($request->ajax()) {
+            return view('content.pagination-cards', compact('contents'))->render();
+        }
+
+        return view('content.index', compact('contents'));
     }
 
     /**
@@ -78,14 +95,25 @@ class ContentController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Toggle favourite content by id
      *
+     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function toggleFavorite(Request $request, $id)
     {
-        //
+        $user = auth()->user();
+
+        $content = $user->contents()->find($id);
+
+        $content->favorite = ($content->favorite === '1' ? '0' : '1');
+        $update = $content->save();
+        if ($update) {
+            return response()->json(['status' => 'success', 'message' => ($content->favorite === '1' ? 'Content added to favourites.' : 'Content removed from favourites.')]);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Failed to update.']);
+        }
     }
 
     /**

@@ -17,8 +17,8 @@ Route::get('/', function () {
 
 Auth::routes();
 
-// Route::get('/home', 'HomeController@index')->name('home');
-
+Route::get('contents/favorites', 'ContentController@favorites')->name('contents.favorites');
 Route::resource('contents', 'ContentController');
-Route::resource('favourites', 'FavouriteController');
 Route::resource('file-upload', 'FileUploadController');
+
+Route::post('contents/{id}/toggle-favorite', 'ContentController@toggleFavorite');

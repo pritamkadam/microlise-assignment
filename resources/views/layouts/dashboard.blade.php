@@ -36,7 +36,7 @@
                     <a class="nav-link" href="{{ route('contents.index') }}">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('favourites.index') }}">Favourites</a>
+                    <a class="nav-link" href="{{ route('contents.favorites') }}">Favourites</a>
                 </li>
             </ul>
             <div class="form-inline my-2 my-md-0">
