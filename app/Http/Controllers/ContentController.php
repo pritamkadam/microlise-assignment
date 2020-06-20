@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Content;
 use App\ContentCategory;
+use App\Http\Requests\StoreContent;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ContentController extends Controller
@@ -26,14 +28,21 @@ class ContentController extends Controller
      */
     public function index(Request $request)
     {
-        $contents = auth()->user()->contents()->with('content_category')->paginate(6);
+        try {
+            // get all logged in user content with their category with pagination
+            $contents = auth()->user()->contents()->with('content_category')->paginate(6);
 
-        // if ajax request
-        if ($request->ajax()) {
-            return view('content.pagination-cards', compact('contents'))->render();
+            // if ajax request
+            if ($request->ajax()) {
+                return view('content.pagination-cards', compact('contents'))->render();
+            }
+
+            return view('content.index', compact('contents'));
+        } catch (Exception $ex) {
+            // if exception occurred log error and abort with 500 status
+            Log::error($ex->getMessage());
+            return abort(500);
         }
-
-        return view('content.index', compact('contents'));
     }
 
     /**
@@ -43,14 +52,21 @@ class ContentController extends Controller
      */
     public function favorites(Request $request)
     {
-        $contents = auth()->user()->contents()->where('contents.favorite', '1')->with('content_category')->paginate(6);
+        try {
+            // get all logged in user favourite content with their category with pagination
+            $contents = auth()->user()->contents()->where('contents.favorite', '1')->with('content_category')->paginate(6);
 
-        // if ajax request
-        if ($request->ajax()) {
-            return view('content.pagination-cards', compact('contents'))->render();
+            // if ajax request
+            if ($request->ajax()) {
+                return view('content.pagination-cards', compact('contents'))->render();
+            }
+
+            return view('content.favourites', compact('contents'));
+        } catch (Exception $ex) {
+            // if exception occurred log error and abort with 500 status
+            Log::error($ex->getMessage());
+            return abort(500);
         }
-
-        return view('content.index', compact('contents'));
     }
 
     /**
@@ -60,37 +76,39 @@ class ContentController extends Controller
      */
     public function create()
     {
-        $content_categories = ContentCategory::all();
+        try {
+            // get all content categories
+            $content_categories = ContentCategory::all();
 
-        return view('content.create', compact('content_categories'));
+            return view('content.create', compact('content_categories'));
+        } catch (Exception $ex) {
+            // if exception occurred log error and abort with 500 status
+            Log::error($ex->getMessage());
+            return abort(500);
+        }
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  App\Http\Requests\StoreContent  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreContent $request)
     {
-        $request->validate([
-            'file_name' => 'string',
-            'original_file_name' => 'string',
-            'file_path' => 'required|string',
-            'content_category_id' => 'required|integer',
-        ], [
-            'file_path.required' =>
-            'File is required.',
-            'content_category_id.required' => 'Please select a category.'
-        ]);
+        try {
+            // store user content
+            $content = auth()->user()->contents()->create($request->all());
 
-        $user = auth()->user();
-
-        $content = $user->contents()->create($request->all());
-        if ($content) {
-            return response()->json(['status' => 'success', 'message' => 'Content stored successfully.', 'redirect_to' => route('contents.index')]);
-        } else {
-            return response()->json(['status' => 'error', 'message' => 'Failed to store.']);
+            if ($content) {
+                return response()->json(['status' => 'success', 'message' => 'Content stored successfully.', 'redirect_to' => route('contents.index')]);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Failed to store.']);
+            }
+        } catch (Exception $ex) {
+            // if exception occurred log error and return error json with 500 code
+            Log::error($ex->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Server error.'], 500);
         }
     }
 
@@ -103,16 +121,23 @@ class ContentController extends Controller
      */
     public function toggleFavorite(Request $request, $id)
     {
-        $user = auth()->user();
+        try {
 
-        $content = $user->contents()->find($id);
+            // find user content by id
+            $content = auth()->user()->contents()->find($id);
 
-        $content->favorite = ($content->favorite === '1' ? '0' : '1');
-        $update = $content->save();
-        if ($update) {
-            return response()->json(['status' => 'success', 'message' => ($content->favorite === '1' ? 'Content added to favourites.' : 'Content removed from favourites.')]);
-        } else {
-            return response()->json(['status' => 'error', 'message' => 'Failed to update.']);
+            // update content favorite column
+            $content->favorite = ($content->favorite === '1' ? '0' : '1');
+            $update = $content->save();
+            if ($update) {
+                return response()->json(['status' => 'success', 'message' => ($content->favorite === '1' ? 'Content added to favourites.' : 'Content removed from favourites.')]);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Failed to update.']);
+            }
+        } catch (Exception $ex) {
+            // if exception occurred log error and return error json with 500 code
+            Log::error($ex->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Server error.'], 500);
         }
     }
 
@@ -124,45 +149,51 @@ class ContentController extends Controller
      */
     public function edit($id)
     {
-        $content = auth()->user()->contents()->find($id);
+        try {
+            // find user content by id
+            $content = auth()->user()->contents()->find($id);
 
-        if (!$content) {
-            return redirect('404');
+            // if content does not exist abort with 404 not found
+            if (!$content) {
+                return abort('404', 'Content not found.');
+            }
+
+            // get all content categories
+            $content_categories = ContentCategory::all();
+
+            return view('content.create', compact('content_categories', 'content'));
+        } catch (Exception $ex) {
+            // if exception occurred log error and abort with 500 status
+            Log::error($ex->getMessage());
+            return abort(500);
         }
-
-        $content_categories = ContentCategory::all();
-
-        return view('content.create', compact('content_categories', 'content'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  App\Http\Requests\StoreContent  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreContent $request, $id)
     {
-        $request->validate([
-            'file_name' => 'string',
-            'original_file_name' => 'string',
-            'file_path' => 'required|string',
-            'content_category_id' => 'required|integer',
-        ], [
-            'file_path.required' => 'File is required.',
-            'content_category_id.required' => 'Please select a category.'
-        ]);
+        try {
 
-        $user = auth()->user();
+            // find user content by id
+            $content = auth()->user()->contents()->find($id);
 
-        $content = $user->contents()->find($id);
-
-        $update = $content->update($request->all());
-        if ($update) {
-            return response()->json(['status' => 'success', 'message' => 'Content stored successfully.', 'redirect_to' => route('contents.index')]);
-        } else {
-            return response()->json(['status' => 'error', 'message' => 'Failed to store.']);
+            // update content
+            $update = $content->update($request->all());
+            if ($update) {
+                return response()->json(['status' => 'success', 'message' => 'Content stored successfully.', 'redirect_to' => route('contents.index')]);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Failed to store.']);
+            }
+        } catch (Exception $ex) {
+            // if exception occurred log error and return error json with 500 code
+            Log::error($ex->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Server error.'], 500);
         }
     }
 
@@ -174,12 +205,27 @@ class ContentController extends Controller
      */
     public function destroy($id)
     {
-        $content = auth()->user()->contents()->find($id);
+        try {
 
-        Storage::delete('public/files/' . $content->file_name);
+            // find user content by id
+            $content = auth()->user()->contents()->find($id);
 
-        $content->delete();
+            // if content exists
+            if ($content) {
+                // delete file
+                Storage::delete('public/files/' . $content->file_name);
 
-        return response()->json(['status' => 'success', 'message' => 'Content deleted successfully.']);
+                // delete content record
+                $content->delete();
+
+                return response()->json(['status' => 'success', 'message' => 'Content deleted successfully.']);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Content not found.']);
+            }
+        } catch (Exception $ex) {
+            // if exception occurred log error and return error json with 500 code
+            Log::error($ex->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Server error.'], 500);
+        }
     }
 }

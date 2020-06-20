@@ -11,12 +11,9 @@
 @section('content')
 <section class="jumbotron text-center">
     <div class="container">
-        <h1>Content</h1>
-        <p class="lead text-muted">This page displays list of all user contents. Click on below "Add Content" button to
-            store new content. Click on heart icon in top right of each card to toggle favorite content.</p>
-        <p>
-            <a href={{ route('contents.create') }} class="btn btn-primary my-2">Add Content</a>
-        </p>
+        <h1>Favorites</h1>
+        <p class="lead text-muted">This page displays list of all user favorite contents. Click on heart icon on top
+            right to remove content from favorites.</p>
     </div>
 </section>
 <div class="alert d-none" role="alert">
