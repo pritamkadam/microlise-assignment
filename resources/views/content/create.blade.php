@@ -24,6 +24,12 @@
                     <input type="hidden" id="original-file-name"
                         value="{{(@$content?$content->original_file_name:'')}}" />
                     <input type="hidden" id="file-path" value="{{(@$content?$content->file_path:'')}}" />
+                    <div class="form-group custom-title">
+                        <label for="content-link">Content Title</label>
+                        <input type="text" class="form-control" id="content-title" name="title"
+                            value="{{ ( @$content ? @$content->title : '') }}" maxlength="255">
+                        <div class="invalid-feedback">Example invalid custom select feedback</div>
+                    </div>
                     <div class="form-group custom-select-form-group">
                         <label for="content-category-id">Content Category</label>
                         <select class="custom-select" id="content-category-id" name="content_category_id">

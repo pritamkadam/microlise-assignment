@@ -28,6 +28,7 @@ class Content extends Model
      */
     protected $fillable = [
         'content_category_id',
+        'title',
         'file_name',
         'original_file_name',
         'file_path'

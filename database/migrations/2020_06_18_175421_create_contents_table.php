@@ -17,6 +17,7 @@ class CreateContentsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('content_category_id');
+            $table->string('title');
             $table->text('file_name')->nullable();
             $table->text('original_file_name')->nullable();
             $table->text('file_path');

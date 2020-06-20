@@ -105,80 +105,101 @@ $(document).ready(function () {
         });
     });
 
-    // on file input change
+    // on save click
     $("#button-save").click(function (event) {
         event.preventDefault();
 
         // hide all required fields and error messages
         $('.alert').removeClass('d-block');
         $('.invalid-feedback').removeClass('d-block');
+        var isValidForm = true;
 
-
-        // create form data
-        var formData = new FormData();
-        // this is a work around for laravels PUT/PATCH routes
-        if ($('#content-create-form').attr('method') === 'PUT') {
-            formData.append('_method', 'PUT');
+        if ($('#content-title').val() === '') {
+            $('.custom-title .invalid-feedback').addClass('d-block');
+            $('.custom-title .invalid-feedback').text('Please enter a title.');
+            isValidForm = false;
         }
-        formData.append('content_category_id', $('#content-category-id').find(":selected").val());
 
-        formData.append('file_name', $('#file-name').val());
-        formData.append('original_file_name', $('#original-file-name').val());
+        if ($('#content-category-id').find(":selected").val() === '') {
+            $('.custom-select-form-group .invalid-feedback').addClass('d-block');
+            $('.custom-select-form-group .invalid-feedback').text('Please select a category.');
+            isValidForm = false;
+        }
 
-        // if file details exist else add content link
-        if ($('#file-path').val()) {
-            formData.append('file_path', $('#file-path').val());
-        } else {
-            var filePath = $('#content-link').val();
-            if (!filePath.match(/^(http:\/\/|https:\/\/)(vimeo\.com|youtu\.be|www\.youtube\.com)\/([\w\/]+)([\?].*)?$/i)) {
-                $('.custom-link-form-group .invalid-feedback').addClass('d-block');
-                $('.custom-link-form-group .invalid-feedback').text('Invalid youtube or vimeo url.');
-                return;
+        if ($('#content-category-id').find(":selected").text().trim() === 'YouTube or Vimeo Link' && !$('#content-link').val().match(/^(http:\/\/|https:\/\/)(vimeo\.com|youtu\.be|www\.youtube\.com)\/([\w\/]+)([\?].*)?$/i)) {
+            $('.custom-link-form-group .invalid-feedback').addClass('d-block');
+            $('.custom-link-form-group .invalid-feedback').text('Invalid youtube or vimeo url.');
+            isValidForm = false;
+        } else if ($('#content-category-id').find(":selected").text().trim() !== 'YouTube or Vimeo Link' && ($('#file-name').val() === '' || $('#original-file-name').val() === '' || $('#file-path').val() === '')) {
+            $('.custom-file .invalid-feedback').addClass('d-block');
+            $('.custom-file .invalid-feedback').text('Please select a file');
+            isValidForm = false;
+        }
+        if (isValidForm) {
+            // create form data
+            var formData = new FormData();
+            // this is a work around for laravels PUT/PATCH routes
+            if ($('#content-create-form').attr('method') === 'PUT') {
+                formData.append('_method', 'PUT');
             }
-            formData.append('file_path', filePath);
-        }
+            formData.append('title', $('#content-title').val());
+            formData.append('content_category_id', $('#content-category-id').find(":selected").val());
+            formData.append('file_name', $('#file-name').val());
+            formData.append('original_file_name', $('#original-file-name').val());
 
-        // display loader
-        $('#button-save .spinner-border').removeClass('d-none');
-        $('#button-save').prop('disabled', true);
+            // if file details exist else add content link
+            if ($('#file-path').val()) {
+                formData.append('file_path', $('#file-path').val());
+            } else {
+                formData.append('file_path', $('#content-link').val());
+            }
 
-        // make ajax api calls
-        $.ajax({
-            url: $('#content-create-form').attr('action'),
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            data: formData,
-            dataType: 'JSON',
-            processData: false,
-            contentType: false,
-            success: function (data) {
-                // update html elements after success and redirect to link
-                $('#button-save .spinner-border').addClass('d-none');
-                $('#button-save').prop('disabled', false);
-                window.location.href = data.redirect_to;
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                // handle errors
-                $('#button-save .spinner-border').addClass('d-none');
-                $('#button-save').prop('disabled', false);
-                var response = xhr.responseJSON;
-                if (response) {
-                    if (response.errors) {
-                        var errors = response.errors;
-                        if (errors.file_name) {
-                            $('.custom-file .invalid-feedback').addClass('d-block');
-                            $('.custom-file .invalid-feedback').text(errors.file_name[0]);
+            // display loader
+            $('#button-save .spinner-border').removeClass('d-none');
+            $('#button-save').prop('disabled', true);
+
+            // make ajax api calls
+            $.ajax({
+                url: $('#content-create-form').attr('action'),
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                data: formData,
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    // update html elements after success and redirect to link
+                    $('#button-save .spinner-border').addClass('d-none');
+                    $('#button-save').prop('disabled', false);
+                    window.location.href = data.redirect_to;
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    // handle errors
+                    $('#button-save .spinner-border').addClass('d-none');
+                    $('#button-save').prop('disabled', false);
+                    var response = xhr.responseJSON;
+                    if (response) {
+                        if (response.errors) {
+                            var errors = response.errors;
+                            if (errors.title) {
+                                $('.custom-title .invalid-feedback').addClass('d-block');
+                                $('.custom-title .invalid-feedback').text(errors.file_name[0]);
+                            }
+                            if (errors.file_name) {
+                                $('.custom-file .invalid-feedback').addClass('d-block');
+                                $('.custom-file .invalid-feedback').text(errors.file_name[0]);
+                            }
+                            if (errors.content_category_id) {
+                                $('.custom-select-form-group .invalid-feedback').addClass('d-block');
+                                $('.custom-select-form-group .invalid-feedback').text(errors.content_category_id[0]);
+                            }
                         }
-                        if (errors.content_category_id) {
-                            $('.custom-select-form-group .invalid-feedback').addClass('d-block');
-                            $('.custom-select-form-group .invalid-feedback').text(errors.content_category_id[0]);
-                        }
+                    } else {
+                        $('.alert').addClass('d-block alert-danger');
+                        $('.alert').text(thrownError);
                     }
-                } else {
-                    $('.alert').addClass('d-block alert-danger');
-                    $('.alert').text(thrownError);
                 }
-            }
-        });
+            });
+        }
     });
 });

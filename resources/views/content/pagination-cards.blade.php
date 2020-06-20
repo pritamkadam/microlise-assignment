@@ -27,8 +27,8 @@
                 @include('assets.svg.camera-video')
             </a>
             @endif
-
             <div class="card-body">
+                <h5 class="card-title">{{ $row->title }}</h5>
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
                         <a href="{{route('contents.edit', $row->id)}}" class="btn btn-sm btn-outline-secondary">Edit</a>
