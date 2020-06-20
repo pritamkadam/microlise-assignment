@@ -36,7 +36,8 @@
                         </select>
                         <div class="invalid-feedback">Example invalid custom select feedback</div>
                     </div>
-                    <div class="form-group custom-link-form-group d-none">
+                    <div
+                        class="form-group custom-link-form-group {{ (@$content && @$content->file_path && !@$content->original_file_name && !@$content->file_name?'':'d-none')}}">
                         <label for="content-link">Youtube or Vimeo Link</label>
                         <input type="text" class="form-control" id="content-link"
                             placeholder="http://www.youtube.com/watch?v=-wtIMTCHWuI"

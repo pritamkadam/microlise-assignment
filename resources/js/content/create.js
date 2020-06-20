@@ -7,6 +7,12 @@ $(document).ready(function () {
         $('#upload-file-form').addClass('d-none');
         $('.custom-link-form-group').addClass('d-none');
         $('.invalid-feedback').removeClass('d-block');
+
+        // reset hidden fields
+        $('#file-name').val(null);
+        $('#file-path').val(null);
+        $('#original-file-name').val(null);
+
         // handle on select value change
         if (this.value) {
             if (this.options[this.selectedIndex].text === 'YouTube or Vimeo Link') {
@@ -106,8 +112,7 @@ $(document).ready(function () {
         // hide all required fields and error messages
         $('.alert').removeClass('d-block');
         $('.invalid-feedback').removeClass('d-block');
-        $('#button-save .spinner-border').removeClass('d-none');
-        $('#button-save').prop('disabled', true);
+
 
         // create form data
         var formData = new FormData();
@@ -117,19 +122,25 @@ $(document).ready(function () {
         }
         formData.append('content_category_id', $('#content-category-id').find(":selected").val());
 
+        formData.append('file_name', $('#file-name').val());
+        formData.append('original_file_name', $('#original-file-name').val());
+
         // if file details exist else add content link
-        if ($('#file-name').val() && $('#file-path').val() && $('#original-file-name').val()) {
-            formData.append('file_name', $('#file-name').val());
+        if ($('#file-path').val()) {
             formData.append('file_path', $('#file-path').val());
-            formData.append('original_file_name', $('#original-file-name').val());
         } else {
             var filePath = $('#content-link').val();
-            if (!filePath.match("^(http:\/\/|https:\/\/)(vimeo\.com|youtu\.be|www\.youtube\.com)\/([\w\/]+)([\?].*)?$")) {
+            if (!filePath.match(/^(http:\/\/|https:\/\/)(vimeo\.com|youtu\.be|www\.youtube\.com)\/([\w\/]+)([\?].*)?$/i)) {
                 $('.custom-link-form-group .invalid-feedback').addClass('d-block');
                 $('.custom-link-form-group .invalid-feedback').text('Invalid youtube or vimeo url.');
+                return;
             }
             formData.append('file_path', filePath);
         }
+
+        // display loader
+        $('#button-save .spinner-border').removeClass('d-none');
+        $('#button-save').prop('disabled', true);
 
         // make ajax api calls
         $.ajax({

@@ -9,9 +9,10 @@ $(document).ready(function () {
 
 
     // on click of delete content button
-    $(document).on('click', '.delete-content', function (event) {
+    $(document).on('click', '.btn-delete', function (event) {
         event.preventDefault();
         // handle html elements
+        $('#deleteConfirmationModal').modal('hide')
         $('.alert').removeClass('d-block alert-success alert-danger');
         var href = $(this).attr('href');
 
@@ -37,9 +38,17 @@ $(document).ready(function () {
         });
     });
 
-
+    attachDeleteButtonHref();
 });
 
+/**
+ * function to attach delete href to modal delete button
+ */
+function attachDeleteButtonHref() {
+    $('#deleteConfirmationModal').on('show.bs.modal', function (e) {
+        $(this).find('.btn-delete').attr('href', $(e.relatedTarget).data('href'));
+    });
+}
 /**
  * function to make ajax call to get data from the give url
  * @param {url} href url of the page to get data
@@ -49,6 +58,7 @@ function fetchData(href) {
         url: href,
         success: function (data) {
             $('#content-data').html(data);
+            attachDeleteButtonHref();
         }
     });
 }

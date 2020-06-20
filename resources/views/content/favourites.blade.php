@@ -1,11 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('css')
-<style>
-    .favourite-wrapper {
-        position: absolute;
-    }
-</style>
+<link href="{{ asset('css/content/index.css') }}" rel="stylesheet">
 @endsection
 
 @section('content')
@@ -16,8 +12,9 @@
             right to remove content from favorites.</p>
     </div>
 </section>
-<div class="alert d-none" role="alert">
-</div>
+
+@include('layouts.alert')
+
 <div class="album py-5 bg-light">
     <div class="container">
         <div id="content-data">

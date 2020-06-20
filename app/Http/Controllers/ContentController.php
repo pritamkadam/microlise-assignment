@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Content;
 use App\ContentCategory;
 use App\Http\Requests\StoreContent;
 use Exception;
@@ -39,8 +40,8 @@ class ContentController extends Controller
 
             return view('content.index', compact('contents'));
         } catch (Exception $ex) {
-            // if exception occurred log error and abort with 500 status
             Log::error($ex->getMessage());
+
             return abort(500);
         }
     }
@@ -63,8 +64,8 @@ class ContentController extends Controller
 
             return view('content.favourites', compact('contents'));
         } catch (Exception $ex) {
-            // if exception occurred log error and abort with 500 status
             Log::error($ex->getMessage());
+
             return abort(500);
         }
     }
@@ -82,8 +83,8 @@ class ContentController extends Controller
 
             return view('content.create', compact('content_categories'));
         } catch (Exception $ex) {
-            // if exception occurred log error and abort with 500 status
             Log::error($ex->getMessage());
+
             return abort(500);
         }
     }
@@ -101,13 +102,22 @@ class ContentController extends Controller
             $content = auth()->user()->contents()->create($request->all());
 
             if ($content) {
-                return response()->json(['status' => 'success', 'message' => 'Content stored successfully.', 'redirect_to' => route('contents.index')]);
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Content stored successfully.',
+                    'redirect_to' => route('contents.index')
+                ]);
             } else {
-                return response()->json(['status' => 'error', 'message' => 'Failed to store.']);
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to store.'
+                ]);
             }
         } catch (Exception $ex) {
-            // if exception occurred log error and return error json with 500 code
             Log::error($ex->getMessage());
+
             return response()->json(['status' => 'error', 'message' => 'Server error.'], 500);
         }
     }
@@ -129,15 +139,27 @@ class ContentController extends Controller
             // update content favorite column
             $content->favorite = ($content->favorite === '1' ? '0' : '1');
             $update = $content->save();
+
             if ($update) {
-                return response()->json(['status' => 'success', 'message' => ($content->favorite === '1' ? 'Content added to favourites.' : 'Content removed from favourites.')]);
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => ($content->favorite === '1' ? 'Content added to favourites.' : 'Content removed from favourites.')
+                ]);
             } else {
-                return response()->json(['status' => 'error', 'message' => 'Failed to update.']);
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to update.'
+                ]);
             }
         } catch (Exception $ex) {
-            // if exception occurred log error and return error json with 500 code
             Log::error($ex->getMessage());
-            return response()->json(['status' => 'error', 'message' => 'Server error.'], 500);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Server error.'
+            ], 500);
         }
     }
 
@@ -147,24 +169,16 @@ class ContentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Content $content)
     {
         try {
-            // find user content by id
-            $content = auth()->user()->contents()->find($id);
-
-            // if content does not exist abort with 404 not found
-            if (!$content) {
-                return abort('404', 'Content not found.');
-            }
-
             // get all content categories
             $content_categories = ContentCategory::all();
 
             return view('content.create', compact('content_categories', 'content'));
         } catch (Exception $ex) {
-            // if exception occurred log error and abort with 500 status
             Log::error($ex->getMessage());
+
             return abort(500);
         }
     }
@@ -176,24 +190,28 @@ class ContentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreContent $request, $id)
+    public function update(StoreContent $request, Content $content)
     {
         try {
-
-            // find user content by id
-            $content = auth()->user()->contents()->find($id);
-
-            // update content
-            $update = $content->update($request->all());
-            if ($update) {
-                return response()->json(['status' => 'success', 'message' => 'Content stored successfully.', 'redirect_to' => route('contents.index')]);
+            if ($content->update($request->all())) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Content stored successfully.',
+                    'redirect_to' => route('contents.index')
+                ]);
             } else {
-                return response()->json(['status' => 'error', 'message' => 'Failed to store.']);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Failed to store.'
+                ]);
             }
         } catch (Exception $ex) {
-            // if exception occurred log error and return error json with 500 code
             Log::error($ex->getMessage());
-            return response()->json(['status' => 'error', 'message' => 'Server error.'], 500);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Server error.'
+            ], 500);
         }
     }
 
@@ -203,29 +221,23 @@ class ContentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Content $content)
     {
         try {
+            Storage::delete('public/files/' . $content->file_name);
+            $content->delete();
 
-            // find user content by id
-            $content = auth()->user()->contents()->find($id);
-
-            // if content exists
-            if ($content) {
-                // delete file
-                Storage::delete('public/files/' . $content->file_name);
-
-                // delete content record
-                $content->delete();
-
-                return response()->json(['status' => 'success', 'message' => 'Content deleted successfully.']);
-            } else {
-                return response()->json(['status' => 'error', 'message' => 'Content not found.']);
-            }
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Content deleted successfully.'
+            ]);
         } catch (Exception $ex) {
-            // if exception occurred log error and return error json with 500 code
             Log::error($ex->getMessage());
-            return response()->json(['status' => 'error', 'message' => 'Server error.'], 500);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Server error.'
+            ], 500);
         }
     }
 }

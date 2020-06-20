@@ -24,8 +24,8 @@ class StoreContent extends FormRequest
     public function rules()
     {
         return [
-            'file_name' => 'string',
-            'original_file_name' => 'string',
+            'file_name' => 'nullable|string',
+            'original_file_name' => 'nullable|string',
             'file_path' => 'required|string',
             'content_category_id' => 'required|integer',
         ];
