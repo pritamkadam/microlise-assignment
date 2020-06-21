@@ -59,6 +59,10 @@ Run the database migrations & seeder (**Set the database connection in .env befo
         php artisan migrate
         php artisan db:seed
 
+Link storage to public storage
+
+    php artisan storage:link
+
 Start the local development server
 
     php artisan serve
