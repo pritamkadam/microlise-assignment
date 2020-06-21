@@ -56,8 +56,8 @@ Generate a new application key
    
 Run the database migrations & seeder (**Set the database connection in .env before migrating**)
 
-        php artisan migrate
-        php artisan db:seed
+    php artisan migrate
+    php artisan db:seed
 
 Link storage to public storage
 
