@@ -1,8 +1,7 @@
 <?php
 
-use Carbon\Carbon;
+use App\ContentCategory;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ContentCategorySeeder extends Seeder
 {
@@ -13,38 +12,11 @@ class ContentCategorySeeder extends Seeder
      */
     public function run()
     {
-        $dateTime = Carbon::now();
+        collect(['Video', 'Images', 'Documents', 'Audio', 'YouTube or Vimeo Link'])->map(function ($name) {
 
-        DB::table('content_category')->insert([
-            [
-                'name' => 'Video',
-                'created_at' => $dateTime,
-                'updated_at' => $dateTime
-            ],
-            [
-                'name' =>
-                'Images',
-                'created_at' => $dateTime,
-                'updated_at' => $dateTime
-            ],
-            [
-                'name' =>
-                'Documents',
-                'created_at' => $dateTime,
-                'updated_at' => $dateTime
-            ],
-            [
-                'name' =>
-                'Audio',
-                'created_at' => $dateTime,
-                'updated_at' => $dateTime
-            ],
-            [
-                'name' =>
-                'YouTube or Vimeo Link',
-                'created_at' => $dateTime,
-                'updated_at' => $dateTime
-            ]
-        ]);
+            factory(ContentCategory::class)->create([
+                'name' => $name
+            ]);
+        });
     }
 }

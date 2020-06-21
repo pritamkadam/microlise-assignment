@@ -30,10 +30,8 @@ class ContentController extends Controller
     public function index(Request $request)
     {
         try {
-            // get all logged in user content with their category with pagination
             $contents = auth()->user()->contents()->with('content_category')->paginate(6);
 
-            // if ajax request
             if ($request->ajax()) {
                 return view('content.pagination-cards', compact('contents'))->render();
             }
@@ -54,10 +52,8 @@ class ContentController extends Controller
     public function favorites(Request $request)
     {
         try {
-            // get all logged in user favourite content with their category with pagination
             $contents = auth()->user()->contents()->where('contents.favorite', '1')->with('content_category')->paginate(6);
 
-            // if ajax request
             if ($request->ajax()) {
                 return view('content.pagination-cards', compact('contents'))->render();
             }
@@ -98,7 +94,6 @@ class ContentController extends Controller
     public function store(StoreContent $request)
     {
         try {
-            // store user content
             $content = auth()->user()->contents()->create($request->all());
 
             if ($content) {
@@ -194,12 +189,14 @@ class ContentController extends Controller
     {
         try {
             if ($content->update($request->all())) {
+
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Content stored successfully.',
                     'redirect_to' => route('contents.index')
                 ]);
             } else {
+
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Failed to store.'
